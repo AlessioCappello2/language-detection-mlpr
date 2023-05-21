@@ -12,14 +12,12 @@ def vrow(a):
     return a.reshape(1, a.size)
 
 
-def load():
+def load(filePath):
     labels = []
     dataset = []
-    labels_test = []
-    dataset_test = []
     elements_per_row = 0
 
-    with open("../LanguageDetection/Train.txt", "r") as language:
+    with open(filePath, "r") as language:
         for row in language:
             s = row.split(",")
             label = s.pop().split("\n").pop(0)
@@ -32,18 +30,7 @@ def load():
     dataset = numpy.array(dataset)
     dataset = dataset.reshape(int(dataset.size/elements_per_row), elements_per_row).transpose()
 
-    with open("../LanguageDetection/Test.txt", "r") as language_test:
-        for row in language_test:
-            s = row.split(",")
-            label = s.pop().split("\n").pop(0)
-            dataset_test.append([float(i) for i in s[::]])
-            labels_test.append(label)
-
-    labels_test = numpy.array(labels_test, dtype=numpy.int32)
-    dataset_test = numpy.array(dataset_test)
-    dataset_test = dataset_test.reshape(int(dataset_test.size/elements_per_row), elements_per_row).transpose()
-
-    return dataset, labels, dataset_test, labels_test
+    return dataset, labels
 
 def show_histo(d, l):
     d1 = d[:, l==1]
