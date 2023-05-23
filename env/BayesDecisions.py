@@ -2,13 +2,12 @@ import numpy
 
 def compute_confusion_matrix(l, pl):
     confusion_matrix = numpy.zeros([2, 2])
-    confusion_matrix[0, 0] = numpy.count_nonzero(numpy.where(l == 0 & pl == 0, 1, 0))
-    confusion_matrix[0, 1] = numpy.count_nonzero(numpy.where(l == 1 & pl == 0, 1, 0))
-    confusion_matrix[1, 0] = numpy.count_nonzero(numpy.where(l == 0 & pl == 1, 1, 0))
-    confusion_matrix[1, 1] = numpy.count_nonzero(numpy.where(l == 1 & pl == 1, 1, 0))
+    confusion_matrix[0, 0] = numpy.count_nonzero(numpy.where((l == 0) & (pl == 0), 1, 0))
+    confusion_matrix[0, 1] = numpy.count_nonzero(numpy.where((l == 1) & (pl == 0), 1, 0))
+    confusion_matrix[1, 0] = numpy.count_nonzero(numpy.where((l == 0) & (pl == 1), 1, 0))
+    confusion_matrix[1, 1] = numpy.count_nonzero(numpy.where((l == 1) & (pl == 1), 1, 0))
     return confusion_matrix
-    
-    
+      
 
 def optimal_bayes_decisions(llr, labels, wp, brute_force=False, t=0):
     pi_t = wp[0]

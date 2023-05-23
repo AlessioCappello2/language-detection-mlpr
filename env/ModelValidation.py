@@ -1,4 +1,7 @@
 import numpy
+from GaussianModels import *
+from LogisticRegressionModels import *
+from BayesDecisions import *
 
 def kfold(dataset, labels, k, workingPoint):
     K = k
@@ -7,11 +10,12 @@ def kfold(dataset, labels, k, workingPoint):
     Cfn = workingPoint[1]
     Cfp = workingPoint[2]
 
-    classifiers = [(MVG_log, "Multivariate Gaussian Classifier"), (MVG_NaiveBayes, "Naive Bayes"),
-                   (MVG_TiedCovariance, "Tied Covariance"), (logisticRegression, "Logistic Regression"),
-                   (smartLogisticRegression, "Smart Logistic Regression"), (quadraticLogisticRegression, "Quadratic Logistic Regression")]
+    classifiers = [(MVG_log, "Multivariate Gaussian Classifier", "Default"), (MVG_log, "Naive Bayes", "Naive"),
+                   (MVG_log, "Tied Covariance", "Tied"), (logisticRegression, "Logistic Regression", "Default"),
+                   (logisticRegression, "Weighted Logistic Regression", "Weighted"), (logisticRegression, "Quadratic Logistic Regression", "Quadratic"),
+                   (logisticRegression, "Weighted Quadratic Logistic Regression", "Weighted quadratic")]
 
-    for j, (c, cstring) in enumerate(classifiers):
+    for j, (c, cstring, variant) in enumerate(classifiers):
         nWrongPrediction = 0
         scoresfold = []
         labelsfold = []
@@ -29,7 +33,7 @@ def kfold(dataset, labels, k, workingPoint):
             LTE = labels[splits[i]]
             # nCorrectPrediction, nSamples = c(DTR, LTR, DTE, LTE, prior, True)
             # nWrongPrediction += nSamples - nCorrectPrediction
-            scoresfold.append(c(DTR, LTR, DTE, LTE, piT, True))
+            scoresfold.append(c(DTR, LTR, DTE, LTE, piT, variant, True))
             labelsfold.append(LTE)
 
         gotscores = numpy.hstack(scoresfold)

@@ -1,4 +1,18 @@
 import numpy
+from utils import *
+
+def compute_means_cov_matrixes(d, l):
+    dataset_classes = []
+    means = []
+    cov_matrixes = []
+
+    for i in range(2):
+        dataset_classes.append(d[:, l == i])
+        means.append(dataset_classes[i].mean(1))
+        cov_matrixes.append(numpy.dot(dataset_classes[i]-vcol(means[i]), (dataset_classes[i]-vcol(means[i])).transpose())/dataset_classes[i].shape[1])
+
+    return means, cov_matrixes
+
 
 def logpdf_GAU_ND(x, mu, cov):
     nd = x.shape[0]
@@ -31,10 +45,12 @@ def MVG_log(DTR, LTR, DTE, LTE, prior, variant='Default', scores=False):
             ll_classes.append(loglikelihood(DTE, class_means[i], class_cov_matrixes[i] * numpy.identity(6)))
         elif variant == 'Tied':
             ll_classes.append(loglikelihood(DTE, class_means[i], common_covariance_matrix))
-    
-    log_class_conditional_densities= numpy.array(ll_classes)
+
+    log_class_conditional_densities = numpy.array(ll_classes)
     if scores:
-        return numpy.array(log_class_conditional_densities[1])-numpy.array(log_class_conditional_densities[0])
+        c1 = numpy.array(log_class_conditional_densities[1])
+        c0 = numpy.array(log_class_conditional_densities[0])
+        return c1 - c0
     
     joint_densities = numpy.multiply(class_conditional_densities, vcol(numpy.array([prior, 1-prior])))  # fx,c = fx|c(xt | c) * P(C)
     marginal_densities = vrow(joint_densities.sum(0))  # sum fx,c over c
