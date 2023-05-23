@@ -15,7 +15,7 @@ def vrow(a):
 def load(filePath):
     labels = []
     dataset = []
-    elements_per_row = 0
+    features = 0
 
     with open(filePath, "r") as language:
         for row in language:
@@ -23,21 +23,18 @@ def load(filePath):
             label = s.pop().split("\n").pop(0)
             dataset.append([float(i) for i in s[::]])
             labels.append(label)
-            if elements_per_row == 0:
-                elements_per_row = len(s)
+            if features == 0:
+                features = len(s)
 
     labels = numpy.array(labels, dtype=numpy.int32)
     dataset = numpy.array(dataset)
-    dataset = dataset.reshape(int(dataset.size/elements_per_row), elements_per_row).transpose()
+    dataset = dataset.reshape(int(dataset.size/features), features).transpose()
 
     return dataset, labels
 
 def show_histo(d, l):
     d1 = d[:, l==1]
     d0 = d[:, l==0]
-
-    print(d0)
-    print(d1)
 
     for i in range(6):
         plt.figure()
