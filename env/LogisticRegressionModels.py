@@ -45,7 +45,9 @@ def logreg_obj_wrap(dtr, ltr, lambda_r, prior=-1):
     return logreg_obj
 
 
-def logisticRegression(DTR, LTR, DTE, LTE, prior, variant='Default', score=False, lambda_r=0.001):
+def logisticRegression(DTR, LTR, DTE, LTE, prior, parameters, score=False):
+    variant = parameters[0]
+    lambda_r = parameters[1]
     if variant == 'Default':
         x, fp, d = sci.optimize.fmin_l_bfgs_b(logreg_obj_wrap(DTR, LTR, lambda_r), numpy.zeros(DTR.shape[0]+1), approx_grad=True)
     elif variant == 'Weighted': 

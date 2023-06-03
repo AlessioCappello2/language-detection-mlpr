@@ -60,3 +60,6 @@ def normalization(d):
     max_vals = vcol(numpy.max(d, axis=1))
     den = max_vals - min_vals
     return (d-min_vals)/den
+
+
+

@@ -1,16 +1,17 @@
 import numpy
 from GaussianModels import *
 from LogisticRegressionModels import *
+from SupportVectorMachines import *
 from BayesDecisions import *
 
-def kfold(dataset, labels, k, workingPoint, classifiers):
+def kfold(dataset, labels, k, workingPoint, classifiers, parameters):
     K = k
     N = int(dataset.shape[1] / float(K))
     piT = workingPoint[0]
     Cfn = workingPoint[1]
     Cfp = workingPoint[2]
 
-    for j, (c, cstring, variant) in enumerate(classifiers):
+    for j, (c, cstring) in enumerate(classifiers):
         nWrongPrediction = 0
         scoresfold = []
         labelsfold = []
@@ -28,7 +29,7 @@ def kfold(dataset, labels, k, workingPoint, classifiers):
             LTE = labels[splits[i]]
             # nCorrectPrediction, nSamples = c(DTR, LTR, DTE, LTE, prior, True)
             # nWrongPrediction += nSamples - nCorrectPrediction
-            scoresfold.append(c(DTR, LTR, DTE, LTE, piT, variant, True))
+            scoresfold.append(c(DTR, LTR, DTE, LTE, piT, parameters[j], True))
             labelsfold.append(LTE)
 
         gotscores = numpy.hstack(scoresfold)

@@ -30,7 +30,8 @@ def loglikelihood(x_test, mu_class, cov_class):
     return logpdf_GAU_ND(x_test, mu_class, cov_class)
 
 
-def MVG_log(DTR, LTR, DTE, LTE, prior, variant='Default', scores=False):
+def MVG_log(DTR, LTR, DTE, LTE, prior, parameters, scores=False):
+    variant = parameters
     class_means, class_cov_matrixes = compute_means_cov_matrixes(DTR, LTR)
     ll_classes = []
     if variant == 'Tied':
@@ -66,7 +67,8 @@ def MVG_log(DTR, LTR, DTE, LTE, prior, variant='Default', scores=False):
     return numpy.count_nonzero(predicted_labels-LTE == 0), LTE.size
 
 
-def MVG(DTR, LTR, DTE, LTE, prior, variant='Default', scores=False):
+def MVG(DTR, LTR, DTE, LTE, prior, parameters, scores=False):
+    variant = parameters
     class_means, class_cov_matrixes = compute_means_cov_matrixes(DTR, LTR)
     ll_classes = []
     if variant == 'Tied':
