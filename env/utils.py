@@ -44,4 +44,19 @@ def show_histo(d, l):
 
         plt.tight_layout()
         plt.savefig('hist_%d.pdf' % i)
-    plt.show()
+        plt.show()
+
+
+def centerDataset(d):
+    return d - vcol(d.mean(1))
+
+
+def zNormalization(d):
+    return (d - vcol(d.mean(1)))/(vcol(numpy.std(d, axis=1)))
+
+
+def normalization(d):
+    min_vals = vcol(numpy.min(d, axis=1))
+    max_vals = vcol(numpy.max(d, axis=1))
+    den = max_vals - min_vals
+    return (d-min_vals)/den

@@ -3,17 +3,12 @@ from GaussianModels import *
 from LogisticRegressionModels import *
 from BayesDecisions import *
 
-def kfold(dataset, labels, k, workingPoint):
+def kfold(dataset, labels, k, workingPoint, classifiers):
     K = k
     N = int(dataset.shape[1] / float(K))
     piT = workingPoint[0]
     Cfn = workingPoint[1]
     Cfp = workingPoint[2]
-
-    classifiers = [(MVG_log, "Multivariate Gaussian Classifier", "Default"), (MVG_log, "Naive Bayes", "Naive"),
-                   (MVG_log, "Tied Covariance", "Tied"), (logisticRegression, "Logistic Regression", "Default"),
-                   (logisticRegression, "Weighted Logistic Regression", "Weighted"), (logisticRegression, "Quadratic Logistic Regression", "Quadratic"),
-                   (logisticRegression, "Weighted Quadratic Logistic Regression", "Weighted quadratic")]
 
     for j, (c, cstring, variant) in enumerate(classifiers):
         nWrongPrediction = 0
@@ -40,8 +35,9 @@ def kfold(dataset, labels, k, workingPoint):
         gotlabels = numpy.hstack(labelsfold)
 
         cm = optimal_bayes_decisions(gotscores, gotlabels, workingPoint)
+        print(cm)
         DCFu = compute_bayes_risk(cm, workingPoint)
-        actualDCF = DCFu /compute_dummy_bayes(workingPoint)
+        actualDCF = DCFu/compute_dummy_bayes(workingPoint)
         minDCF = compute_minDCF(gotscores, gotlabels, workingPoint)
 
         # errorRate = nWrongPrediction / dataset.shape[1]
@@ -56,7 +52,7 @@ def split_db_k(n, k, seed=0):
     idx = numpy.random.permutation(n)
     res = []
     res.append(idx[0:nFold])
-    for i in range(1, k- 1):
+    for i in range(1, k-1):
         res.append(idx[i * nFold:(i + 1) * nFold])
     res.append(idx[(k - 1) * nFold:])
 
