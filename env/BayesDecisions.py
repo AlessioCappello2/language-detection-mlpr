@@ -61,3 +61,18 @@ def compute_minDCF(llr, labels, wp):
     # ROC_plot(FPR[sorted_indices], FNR[sorted_indices])
 
     return dcfmin
+
+
+def mindcf_plot(classifier, D, L):
+    label = ""
+    if "Gaussian" in classifier:
+        label = ""
+    elif "Logistic" in classifier:
+        label = "λ"
+        lambda_r = numpy.linspace(-5, 3, 21)
+    
+    plot_mindcf = []
+    for i in range(lambda_r.size):
+        print("c")
+
+
