@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from GaussianModels import *
 from LogisticRegressionModels import *
 from SupportVectorMachines import *
+from GaussianMixtureModels import *
 from BayesDecisions import *
 
 def kfold(dataset, labels, k, workingPoint, classifiers, parameters):
@@ -37,7 +38,6 @@ def kfold(dataset, labels, k, workingPoint, classifiers, parameters):
         gotlabels = numpy.hstack(labelsfold)
 
         cm = optimal_bayes_decisions(gotscores, gotlabels, workingPoint)
-        print(cm)
         DCFu = compute_bayes_risk(cm, workingPoint)
         actualDCF = DCFu/compute_dummy_bayes(workingPoint)
         minDCF = compute_minDCF(gotscores, gotlabels, workingPoint)
