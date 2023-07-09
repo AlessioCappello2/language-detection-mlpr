@@ -1,6 +1,7 @@
 import numpy
 import matplotlib.pyplot as plt
 import scipy as sci
+import seaborn as sns
 from mpl_toolkits import mplot3d
 from sklearn.metrics import confusion_matrix
 
@@ -36,14 +37,16 @@ def show_histo(d, l):
     d1 = d[:, l==1]
     d0 = d[:, l==0]
 
-    for i in range(6):
+    for i in range(2):
         plt.figure()
-        plt.hist(d0[i, :], label='Non italian')
-        plt.hist(d1[i, :], label='Italian')
+        plt.hist(d0[i, :], label='Non target', color="#5873E8", density=True, edgecolor='black',
+                 linewidth=0.5, alpha=0.7)
+        plt.hist(d1[i, :], label='Target', color="#E35C3D", density=True, edgecolor='black',
+                 linewidth=0.5, alpha=0.7)
         plt.legend()
 
         plt.tight_layout()
-        plt.savefig('hist_%d.pdf' % i)
+        # plt.savefig('component_%d.svg' % i)
         plt.show()
 
 
@@ -62,4 +65,9 @@ def normalization(d):
     return (d-min_vals)/den
 
 
+def heatmap(dataset, cmap):
+    cor_matrix = numpy.corrcoef(dataset)
+    sns.heatmap(cor_matrix, cmap=cmap)
+    plt.savefig('heatmap_%s.svg' % cmap)
+    plt.show()
 

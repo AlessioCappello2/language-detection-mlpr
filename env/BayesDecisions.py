@@ -16,7 +16,7 @@ def optimal_bayes_decisions(llr, labels, wp, brute_force=False, t=0):
     if not brute_force:
         t = -1 * numpy.log(pi_t*cfn/(1-pi_t)/cfp)
 
-    predicted_labels = numpy.where(llr >= t, 1, 0)
+    predicted_labels = numpy.where(llr > t, 1, 0)
     return compute_confusion_matrix(labels, predicted_labels)
 
 

@@ -22,8 +22,8 @@ def RBF(D1, D2, gamma):
 
 def SupportVectorMachineLinear(DTR, LTR, DTE, LTE, prior, parameters, scoresFlag=False):
     variant = parameters[0]
-    K = parameters[1]
-    C = parameters[2]
+    K = float(parameters[1])
+    C = float(parameters[2])
     DTR_cap = numpy.vstack([DTR, numpy.full(DTR.shape[1], K)])
     DTE_cap = numpy.vstack([DTE, numpy.full(DTE.shape[1], K)])
     ZTR = 2*LTR-1
@@ -51,10 +51,10 @@ def SupportVectorMachineLinear(DTR, LTR, DTE, LTE, prior, parameters, scoresFlag
 
 def SupportVectorMachineKernelPoly(DTR, LTR, DTE, LTE, prior, parameters, scoresFlag=False):
     variant = parameters[0]
-    K = parameters[1]
-    C = parameters[2]
-    c = parameters[3]
-    deg = parameters[4]
+    K = float(parameters[1])
+    C = float(parameters[2])
+    c = float(parameters[3])
+    deg = int(parameters[4])
     ZTR = 2*LTR-1
     eps = K**2
     H = numpy.dot(vcol(ZTR), vrow(ZTR))*(((numpy.dot(DTR.T, DTR)+c)**deg)+eps)
@@ -76,9 +76,9 @@ def SupportVectorMachineKernelPoly(DTR, LTR, DTE, LTE, prior, parameters, scores
 
 def SupportVectorMachineKernelRBF(DTR, LTR, DTE, LTE, prior, parameters, scoresFlag=False):
     variant = parameters[0]
-    K = parameters[1]
-    C = parameters[2]
-    gamma = parameters[3]
+    K = float(parameters[1])
+    C = float(parameters[2])
+    gamma = float(parameters[3])
     ZTR = 2*LTR-1
     eps = K**2
     H = numpy.dot(vcol(ZTR), vrow(ZTR))*(RBF(DTR, DTR, gamma)+eps)

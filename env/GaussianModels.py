@@ -35,7 +35,7 @@ def MVG_log(DTR, LTR, DTE, LTE, prior, parameters, scores=False):
     class_means, class_cov_matrixes = compute_means_cov_matrixes(DTR, LTR)
     ll_classes = []
     if variant == 'Tied':
-        common_covariance_matrix = numpy.zeros([6, 6])
+        common_covariance_matrix = numpy.zeros([DTR.shape[0], DTR.shape[0]])
         for i in range(2):
             common_covariance_matrix += class_cov_matrixes[i] * float(numpy.count_nonzero(LTR == i))
         common_covariance_matrix /= LTR.size
@@ -44,7 +44,7 @@ def MVG_log(DTR, LTR, DTE, LTE, prior, parameters, scores=False):
         if variant == 'Default':
             ll_classes.append(loglikelihood(DTE, class_means[i], class_cov_matrixes[i]))
         elif variant == 'Naive':
-            ll_classes.append(loglikelihood(DTE, class_means[i], class_cov_matrixes[i] * numpy.identity(6)))
+            ll_classes.append(loglikelihood(DTE, class_means[i], class_cov_matrixes[i] * numpy.identity(DTR.shape[0])))
         elif variant == 'Tied':
             ll_classes.append(loglikelihood(DTE, class_means[i], common_covariance_matrix))
 

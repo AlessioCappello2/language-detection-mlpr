@@ -12,6 +12,7 @@ def kfold(dataset, labels, k, workingPoint, classifiers, parameters):
     piT = workingPoint[0]
     Cfn = workingPoint[1]
     Cfp = workingPoint[2]
+    array_mindcf = numpy.zeros(0)
 
     for j, (c, cstring) in enumerate(classifiers):
         nWrongPrediction = 0
@@ -41,11 +42,12 @@ def kfold(dataset, labels, k, workingPoint, classifiers, parameters):
         DCFu = compute_bayes_risk(cm, workingPoint)
         actualDCF = DCFu/compute_dummy_bayes(workingPoint)
         minDCF = compute_minDCF(gotscores, gotlabels, workingPoint)
-
+        array_mindcf = numpy.append(array_mindcf, minDCF)
         # errorRate = nWrongPrediction / dataset.shape[1]
         # accuracy = 1 - errorRate
         # print(f"{cstring} results:\nAccuracy: {accuracy * 100}%\nError rate: {errorRate * 100}%\n")
         print(f"{cstring} results:\nActualDCF: {actualDCF}\nMinDCF: {minDCF}\n")
+    return array_mindcf
 
 def kfoldBayesErrorPlot(dataset, labels, k, workingPoint, classifier, parameters):
     effPriorLogOdds = numpy.linspace(-3, 3, 21)
@@ -104,7 +106,7 @@ def kfoldPlotMinDCFlambda(dataset, labels, k, workingPoint, classifiers, paramet
     piT = workingPoint[0]
     Cfn = workingPoint[1]
     Cfp = workingPoint[2]
-    lambda_r = numpy.linspace(10**-5, 10**3, 21)
+    lambda_r = numpy.linspace(10**-5, 10**3, 9)
     colors = ("r", "b", "g", "m")
 
     for j, (c, cstring) in enumerate(classifiers):
@@ -154,7 +156,7 @@ def kfoldPlotMinDCFC(dataset, labels, k, workingPoint, classifiers, parameters):
     piT = workingPoint[0]
     Cfn = workingPoint[1]
     Cfp = workingPoint[2]
-    C = numpy.linspace(10**-4, 10**-2, 21)
+    C = numpy.linspace(10**-4, 10**2, 7)
     colors = ("r", "b", "g", "m")
 
     for j, (c, cstring) in enumerate(classifiers):
@@ -167,7 +169,7 @@ def kfoldPlotMinDCFC(dataset, labels, k, workingPoint, classifiers, parameters):
         zeroTon = numpy.arange(0, dataset.shape[1])
         plot_mindcf = []
 
-        for l in range(lambda_r.size):
+        for l in range(C.size):
             if parameters[j][0] == "SVML":
                 par = (parameters[j][0], parameters[j][1], l)
             elif parameters[j][0] == "SVMP":
@@ -192,7 +194,7 @@ def kfoldPlotMinDCFC(dataset, labels, k, workingPoint, classifiers, parameters):
             cm = optimal_bayes_decisions(gotscores, gotlabels, (piT, 1, 1))
             plot_mindcf.append(compute_minDCF(gotscores, gotlabels, (piT, 1, 1)))
 
-        plt.plot(lambda_r, plot_mindcf, label="C", color=color)
+        plt.plot(C, plot_mindcf, label="C", color=color)
 
     plt.xscale('log')
     plt.ylim([min(plot_mindcf), max(plot_mindcf)])
