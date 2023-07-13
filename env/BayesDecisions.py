@@ -1,4 +1,5 @@
 import numpy
+import matplotlib.pyplot as plt
 
 def compute_confusion_matrix(l, pl):
     confusion_matrix = numpy.zeros([2, 2])
@@ -36,7 +37,7 @@ def compute_dummy_bayes(wp):
     return numpy.min(numpy.array([pi_t*cfn, (1-pi_t)*cfp]))
 
 
-def compute_minDCF(llr, labels, wp):
+def compute_minDCF(llr, labels, wp, plot=False):
     pi_t = wp[0]
     cfn = wp[1]
     cfp = wp[2]
@@ -54,11 +55,11 @@ def compute_minDCF(llr, labels, wp):
         if DCF < dcfmin:
             dcfmin = DCF
 
-    # FNR = numpy.array(FNR)
-    # FPR = numpy.array(FPR)
-
-    # sorted_indices = numpy.argsort(FPR)
-    # ROC_plot(FPR[sorted_indices], FNR[sorted_indices])
+    if plot:
+        FNR = numpy.array(FNR)
+        FPR = numpy.array(FPR)
+        sorted_indices = numpy.argsort(FPR)
+        DET_plot(FPR[sorted_indices], FNR[sorted_indices])
 
     return dcfmin
 
@@ -76,3 +77,9 @@ def mindcf_plot(classifier, D, L):
         print("c")
 
 
+def DET_plot(FPR, FNR):
+    # TPR = numpy.ones_like(FNR)-FNR
+    plt.plot(FPR, FNR)
+    # plt.xlabel("FPR")
+    # plt.ylabel("FNR")
+    # plt.show()

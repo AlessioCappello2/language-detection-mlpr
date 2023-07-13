@@ -54,8 +54,10 @@ def centerDataset(d):
     return d - vcol(d.mean(1))
 
 
-def zNormalization(d):
-    return (d - vcol(d.mean(1)))/(vcol(numpy.std(d, axis=1)))
+def zNormalization(d, eval=False):
+    if not eval:
+        return (d - vcol(d.mean(1)))/(vcol(numpy.std(d, axis=1)))
+    return vcol(d.mean(1)), vcol(numpy.std(d, axis=1))
 
 
 def normalization(d):
@@ -70,4 +72,6 @@ def heatmap(dataset, cmap):
     sns.heatmap(cor_matrix, cmap=cmap)
     plt.savefig('heatmap_%s.svg' % cmap)
     plt.show()
+
+
 

@@ -3,15 +3,16 @@ import matplotlib.pyplot as plt
 import scipy as sci
 from utils import *
 
-def PCA(dataset, labels, nd=3, expl=False):
+def PCA(dataset, labels, nd=3, graph=False, expl=False, eval=False):
     mu = vcol(dataset.mean(1))
     centered_dataset = numpy.round(dataset - mu, 2)
     covariance_matrix = numpy.dot(centered_dataset, centered_dataset.transpose()) / numpy.array(
         [centered_dataset.shape[1]])
     sigma, U = numpy.linalg.eigh(covariance_matrix)
     P = numpy.array(U[:, -1:-(nd+1):-1])
+    if eval: return P
     y = numpy.dot(P.transpose(), dataset)  # dataset e non centered_ visto che vogliamo proiettare i dati originali
-    if nd >= 2:
+    if nd >= 2 and graph:
         plt.scatter(x=y[0, labels == 0], y=y[1, labels == 0], c="#5873E8",
                 label='Non target')
         plt.scatter(x=y[0, labels == 1], y=y[1, labels == 1], c="#E35C3D",
@@ -21,7 +22,7 @@ def PCA(dataset, labels, nd=3, expl=False):
         plt.show()
         show_histo(y, labels)
 
-    if nd >= 3:
+    if nd >= 3 and graph:
         fig = plt.figure()
         ax = plt.axes(projection='3d')
 

@@ -2,6 +2,7 @@ import numpy
 import scipy as sci
 from GaussianModels import loglikelihood
 from utils import *
+from scoreCalibration import scoreCalibration
 
 def logpdf_GMM(X, gmm):
     S = numpy.zeros((len(gmm), X.shape[1]))
@@ -35,7 +36,6 @@ def EMalgorithm(X, gmm, psi, variant="Default", limit=10**(-6)):
         log_marginal_densities, S = logpdf_GMM(X, gmm)
         ll2 = numpy.sum(log_marginal_densities) / X.shape[1]
         # E step
-
         posterior = numpy.exp(S - vrow(log_marginal_densities))
         # M step
         gotgmm=[]
@@ -52,6 +52,11 @@ def EMalgorithm(X, gmm, psi, variant="Default", limit=10**(-6)):
                 commonCovMatrix += Zg*cov
                 gotgmm.append((w, mu))
                 continue
+            if variant == 'Diagonal tied': ###
+                cov *= numpy.eye(cov.shape[0])
+                commonCovMatrix += Zg*cov
+                gotgmm.append((w, mu))
+                continue
             if variant == 'Diagonal':
                 cov *= numpy.eye(cov.shape[0])
             U, s, _ = numpy.linalg.svd(cov)
@@ -59,7 +64,7 @@ def EMalgorithm(X, gmm, psi, variant="Default", limit=10**(-6)):
             cov = numpy.dot(U, vcol(s) * U.T)
             gotgmm.append((w, mu, cov))
 
-        if variant == 'Tied':
+        if variant == 'Tied' or variant == 'Diagonal tied': ###
             commonCovMatrix /= X.shape[1]
             U, s, _ = numpy.linalg.svd(commonCovMatrix)
             s[s<psi]= psi
@@ -73,21 +78,24 @@ def EMalgorithm(X, gmm, psi, variant="Default", limit=10**(-6)):
 
     return gmm
 
-def GMMclassify(DTR, LTR, DTE, LTE, prior, parameters, scores=True):
+def GMMclassify(DTR, LTR, DTE, LTE, prior, parameters, scores=True, toCalibrate=False):
     variant = parameters[0]
-    components = int(parameters[1])
+    components = parameters[1]
     psi = float(parameters[2])
     alpha = float(parameters[3])
     
     D1 = DTR[:, LTR==1] 
     D0 = DTR[:, LTR==0]
 
-    gmm1 = LBGalgorithm(D1, components, alpha, psi, variant)
-    gmm0 = LBGalgorithm(D0, components, alpha, psi, variant)
+    gmm1 = LBGalgorithm(D1, int(components[1]), alpha, psi, variant[1]) # [1]
+    gmm0 = LBGalgorithm(D0, int(components[0]), alpha, psi, variant[0]) # [0]
 
     log_marginal_densities1, S1 = logpdf_GMM(DTE, gmm1)
     log_marginal_densities0, S0 = logpdf_GMM(DTE, gmm0)
     if scores:
+        if toCalibrate:
+            return scoreCalibration(numpy.array(logpdf_GMM(DTR, gmm1)[0] - logpdf_GMM(DTR, gmm0)[0]), LTR,
+                                    numpy.array(log_marginal_densities1 - log_marginal_densities0), LTE, 0.1).flatten()
         return numpy.array(log_marginal_densities1 - log_marginal_densities0).flatten()
 
     lmd = numpy.vstack((log_marginal_densities0, log_marginal_densities1))
