@@ -118,7 +118,7 @@ def SupportVectorMachineKernelRBF(DTR, LTR, DTE, LTE, prior, parameters, scoresF
     x, fp, d = sci.optimize.fmin_l_bfgs_b(LD_objectiveDualForm, numpy.zeros(DTR.shape[1]), args=(H,), bounds=constraints, factr=1.0)
     scores = numpy.sum(numpy.dot(vrow(x*ZTR), (RBF(DTR, DTE, gamma)+eps)), axis=0)
     if toCalibrate:
-        scores = scoreCalibration(numpy.sum(numpy.dot(vrow(x*ZTR), (RBF(DTR, DTR, gamma)+eps)), axis=0), LTR, scores, LTE, 0.5)
+        scores = scoreCalibration(numpy.sum(numpy.dot(vrow(x*ZTR), (RBF(DTR, DTR, gamma)+eps)), axis=0), LTR, scores, LTE, prior)
     if scoresFlag:
         return scores
 

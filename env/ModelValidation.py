@@ -7,7 +7,7 @@ from SupportVectorMachines import *
 from GaussianMixtureModels import *
 from BayesDecisions import *
 
-def kfold(dataset, labels, k, workingPoint, classifiers, parameters, toCalibrate=False, plot=False):
+def kfold(dataset, labels, k, workingPoint, classifiers, parameters, toCalibrate=False, plot=False, priorCalib=-1):
     K = k
     N = int(dataset.shape[1] / float(K))
     piT = workingPoint[0]
@@ -35,9 +35,10 @@ def kfold(dataset, labels, k, workingPoint, classifiers, parameters, toCalibrate
             # nCorrectPrediction, nSamples = c(DTR, LTR, DTE, LTE, prior, True)
             # nWrongPrediction += nSamples - nCorrectPrediction
             if parameters[j][0] == 'Weighted' or parameters[j][0] == 'Weighted quadratic': ## Prior weighted logistic regression
-                scoresfold.append(c(DTR, LTR, DTE, LTE, parameters[j][2], parameters[j], True, toCalibrate=toCalibrate))
+                #scoresfold.append(c(DTR, LTR, DTE, LTE, parameters[j][2], parameters[j], True, toCalibrate=toCalibrate))
+                scoresfold.append(scoreCalibration(c(DTR, LTR, DTR, LTR, piT, parameters[j], True), LTR, c(DTR, LTR, DTE, LTE, piT, parameters[j], True, toCalibrate=toCalibrate), LTE, priorCalib if priorCalib else piT))
             else:
-                scoresfold.append(c(DTR, LTR, DTE, LTE, piT, parameters[j], True, toCalibrate=toCalibrate))
+                scoresfold.append(c(DTR, LTR, DTE, LTE, priorCalib if priorCalib else piT, parameters[j], True, toCalibrate=toCalibrate))
             labelsfold.append(LTE)
 
         gotscores = numpy.hstack(scoresfold)
@@ -46,7 +47,7 @@ def kfold(dataset, labels, k, workingPoint, classifiers, parameters, toCalibrate
         cm = optimal_bayes_decisions(gotscores, gotlabels, workingPoint)
         DCFu = compute_bayes_risk(cm, workingPoint)
         actualDCF = DCFu/compute_dummy_bayes(workingPoint)
-        minDCF = compute_minDCF(gotscores, gotlabels, workingPoint, True)
+        minDCF = compute_minDCF(gotscores, gotlabels, workingPoint, plot)
         array_mindcf = numpy.append(array_mindcf, minDCF)
         # errorRate = nWrongPrediction / dataset.shape[1]
         # accuracy = 1 - errorRate
@@ -62,7 +63,7 @@ def kfold(dataset, labels, k, workingPoint, classifiers, parameters, toCalibrate
     return array_mindcf
 
 
-def kfoldBayesErrorPlot(dataset, labels, k, workingPoint, classifier, parameters, toCalibrate=False, color="r"):
+def kfoldBayesErrorPlot(dataset, labels, k, workingPoint, classifier, parameters, toCalibrate=False, color="r", plot=False):
     effPriorLogOdds = numpy.linspace(-3, 3, 21)
     pi_sign = 1/(1+numpy.exp(-effPriorLogOdds))
     plot_dcf = []
@@ -89,7 +90,7 @@ def kfoldBayesErrorPlot(dataset, labels, k, workingPoint, classifier, parameters
         # nCorrectPrediction, nSamples = c(DTR, LTR, DTE, LTE, prior, True)
         # nWrongPrediction += nSamples - nCorrectPrediction
         if parameters[0] == 'Weighted quadratic' and toCalibrate == True:
-            scoresfold.append(scoreCalibration(classifier(DTR, LTR, DTR, LTR, piT, parameters, True), LTR, classifier(DTR, LTR, DTE, LTE, piT, parameters, True, toCalibrate=toCalibrate), LTE, 0.1))
+            scoresfold.append(scoreCalibration(classifier(DTR, LTR, DTR, LTR, piT, parameters, True), LTR, classifier(DTR, LTR, DTE, LTE, piT, parameters, True, toCalibrate=toCalibrate), LTE, 0.5))
         else:
             scoresfold.append(classifier(DTR, LTR, DTE, LTE, piT, parameters, True, toCalibrate=toCalibrate))
         labelsfold.append(LTE)
@@ -104,6 +105,9 @@ def kfoldBayesErrorPlot(dataset, labels, k, workingPoint, classifier, parameters
 
     plot_dcf = numpy.array(plot_dcf)
     plot_mindcf = numpy.array(plot_mindcf)
+
+    if plot:
+        return plot_dcf, plot_mindcf
 
     plt.plot(effPriorLogOdds, plot_dcf, linestyle="solid", color=color) #, label="DCF", color ="r")
     plt.plot(effPriorLogOdds, plot_mindcf, linestyle="dashed", color=color) #, label="minDCF", color ="b")
@@ -234,7 +238,7 @@ def kfoldPlotMinDCFC(dataset, labels, k, workingPoints, classifiers, parameters)
             plot_mindcf.append(compute_minDCF(gotscores, gotlabels, (workingPoints[1][0], workingPoints[1][1], workingPoints[1][2])))
 
     plot_mindcf = [(plot_mindcf[i]+plot_mindcf[i+1])/2 for i in range (0, 2*C.size, 2)]
-    plt.plot(C, plot_mindcf, label="C")#, linestyle="dashed")#, color=color)
+    plt.plot(C, plot_mindcf, label="C", linestyle="dashed")#, color=color)
 
     '''plt.xscale('log')
     plt.ylim([min(plot_mindcf), max(plot_mindcf)])
@@ -246,7 +250,7 @@ def kfoldPlotMinDCFC(dataset, labels, k, workingPoints, classifiers, parameters)
     plt.show()'''
 
 
-def kfoldFusion(dataset, labels, k, workingPoint, classifiers, parameters, toCalibrate, pca=[]):
+def kfoldFusion(dataset, labels, k, workingPoint, classifiers, parameters, toCalibrate, pca=[], plot=False):
     effPriorLogOdds = numpy.linspace(-3, 3, 21)
     pi_sign = 1/(1+numpy.exp(-effPriorLogOdds))
     K = k
@@ -279,10 +283,10 @@ def kfoldFusion(dataset, labels, k, workingPoint, classifiers, parameters, toCal
             DTE = _dataset[:, splits[i]]
             LTE = labels[splits[i]]
             if parameters[j][0] == 'Weighted' or parameters[j][0] == 'Weighted quadratic': ## Prior weighted logistic regression
-                scoresfold.append(c(DTR, LTR, DTR, LTR, parameters[j][2], parameters[j], True, '''toCalibrate=toCalibrate[j]'''))
+                scoresfold.append(c(DTR, LTR, DTR, LTR, parameters[j][2], parameters[j], True, toCalibrate=toCalibrate[j])) ## in caso togliere
                 scoresev.append(c(DTR, LTR, DTE, LTE, parameters[j][2], parameters[j], True, toCalibrate=toCalibrate[j]))
             else:
-                scoresfold.append(c(DTR, LTR, DTR, LTR, piT, parameters[j], True, '''toCalibrate=toCalibrate[j]'''))
+                scoresfold.append(c(DTR, LTR, DTR, LTR, piT, parameters[j], True, toCalibrate=toCalibrate[j])) ## in caso togliere
                 scoresev.append(c(DTR, LTR, DTE, LTE, piT, parameters[j], True, toCalibrate=toCalibrate[j]))
 
         gotscores = numpy.vstack(scoresfold)
@@ -294,6 +298,13 @@ def kfoldFusion(dataset, labels, k, workingPoint, classifiers, parameters, toCal
     fusion_labels = numpy.hstack(fusion_labels)
     fusion_scores = numpy.hstack(fusion_scores)
 
+    cm = optimal_bayes_decisions(fusion_scores, fusion_labels, workingPoint)
+    DCFu = compute_bayes_risk(cm, workingPoint)
+    actualDCF = DCFu / compute_dummy_bayes(workingPoint)
+    minDCF = compute_minDCF(fusion_scores, fusion_labels, workingPoint)
+
+    print(f"Fusion results:\nActualDCF: {actualDCF}\nMinDCF: {minDCF}\n")
+
     #print(fusion_labels.shape)
     #print(fusion_scores.shape)
 
@@ -304,6 +315,9 @@ def kfoldFusion(dataset, labels, k, workingPoint, classifiers, parameters, toCal
 
     plot_dcf = numpy.array(plot_dcf)
     plot_mindcf = numpy.array(plot_mindcf)
+
+    if plot:
+        return plot_dcf, plot_mindcf
 
     plt.plot(effPriorLogOdds, plot_dcf, linestyle="solid", color="y") #, label="DCF", color ="r")
     plt.plot(effPriorLogOdds, plot_mindcf, linestyle="dashed", color="y") #, label="minDCF", color ="b")

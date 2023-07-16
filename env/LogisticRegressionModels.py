@@ -54,16 +54,16 @@ def logisticRegression(DTR, LTR, DTE, LTE, prior, parameters, score=False, toCal
     lambda_r = parameters[1]
     if variant == 'Default':
         x, fp, d = sci.optimize.fmin_l_bfgs_b(logreg_obj_wrap(DTR, LTR, lambda_r), numpy.zeros(DTR.shape[0]+1), approx_grad=True)
-    elif variant == 'Weighted':
-        x, fp, d = sci.optimize.fmin_l_bfgs_b(logreg_obj_wrap(DTR, LTR, lambda_r, prior), numpy.zeros(DTR.shape[0]+1), approx_grad=True)    
+    elif variant == 'Weighted':                                                      # vvv prior
+        x, fp, d = sci.optimize.fmin_l_bfgs_b(logreg_obj_wrap(DTR, LTR, lambda_r, parameters[2]), numpy.zeros(DTR.shape[0]+1), approx_grad=True)
     elif variant == 'Quadratic':
         DTR = features_expansion(DTR)
         DTE = features_expansion(DTE)
         x, fp, d = sci.optimize.fmin_l_bfgs_b(logreg_obj_wrap(DTR, LTR, lambda_r), numpy.zeros(DTR.shape[0]+1), approx_grad=True)
     elif variant == 'Weighted quadratic':
         DTR = features_expansion(DTR)
-        DTE = features_expansion(DTE)
-        x, fp, d = sci.optimize.fmin_l_bfgs_b(logreg_obj_wrap(DTR, LTR, lambda_r, prior), numpy.zeros(DTR.shape[0]+1), approx_grad=True)
+        DTE = features_expansion(DTE)                                               # vvv prior
+        x, fp, d = sci.optimize.fmin_l_bfgs_b(logreg_obj_wrap(DTR, LTR, lambda_r, parameters[2]), numpy.zeros(DTR.shape[0]+1), approx_grad=True)
 
     #print(parameters)
     #print(x[0:-1].shape)

@@ -95,7 +95,7 @@ def GMMclassify(DTR, LTR, DTE, LTE, prior, parameters, scores=True, toCalibrate=
     if scores:
         if toCalibrate:
             return scoreCalibration(numpy.array(logpdf_GMM(DTR, gmm1)[0] - logpdf_GMM(DTR, gmm0)[0]), LTR,
-                                    numpy.array(log_marginal_densities1 - log_marginal_densities0), LTE, 0.1).flatten()
+                                    numpy.array(log_marginal_densities1 - log_marginal_densities0), LTE, prior).flatten()
         return numpy.array(log_marginal_densities1 - log_marginal_densities0).flatten()
 
     lmd = numpy.vstack((log_marginal_densities0, log_marginal_densities1))

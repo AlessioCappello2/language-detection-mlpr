@@ -78,8 +78,4 @@ def mindcf_plot(classifier, D, L):
 
 
 def DET_plot(FPR, FNR):
-    # TPR = numpy.ones_like(FNR)-FNR
     plt.plot(FPR, FNR)
-    # plt.xlabel("FPR")
-    # plt.ylabel("FNR")
-    # plt.show()
